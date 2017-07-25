@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>{8D01477E-88CE-4645-9D97-0B458C6FEA1F}</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>TodoList</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)App.xaml" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)TodoListPage.xaml" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Pages\EntryPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Pages\TaskList.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Pages\TaskDetail.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)TodoListPage.xaml.cs">
+      <DependentUpon>TodoListPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Abstractions\ICloudService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Abstractions\ICloudTable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Abstractions\TableData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\AzureCloudService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Services\AzureCloudTable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\TodoItem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Abstractions\BaseViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pages\EntryPage.xaml.cs">
+      <DependentUpon>EntryPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\EntryPageViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pages\TaskList.xaml.cs">
+      <DependentUpon>TaskList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\TaskListViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Pages\TaskDetail.xaml.cs">
+      <DependentUpon>TaskDetail.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\TaskDetailViewModel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Abstractions\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Models\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Pages\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Services\" />
+    <Folder Include="$(MSBuildThisFileDirectory)ViewModels\" />
+  </ItemGroup>
+</Project>
