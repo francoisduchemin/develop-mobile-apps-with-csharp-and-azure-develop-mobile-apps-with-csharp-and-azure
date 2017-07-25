@@ -2,8 +2,10 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using TodoList.Abstractions;
+using TodoList.Helpers;
 using TodoList.Models;
 using Xamarin.Forms;
 
@@ -11,10 +13,30 @@ namespace TodoList.ViewModels
 {
 	public class TaskListViewModel : BaseViewModel
 	{
+        ICloudService cloudService;
+
 		public TaskListViewModel()
 		{
+            cloudService = ServiceLocator.Instance.Resolve<ICloudService>();
+            Table = cloudService.GetTable<TodoItem>();
+
 			Title = "Task List";
-			RefreshList();
+            items.CollectionChanged += this.OnCollectionChanged;
+
+			RefreshCommand = new Command(async () => await ExecuteRefreshCommand());
+			AddNewItemCommand = new Command(async () => await ExecuteAddNewItemCommand());
+
+			// Execute the refresh command
+			RefreshCommand.Execute(null);
+		}
+
+        public ICloudTable<TodoItem> Table { get; set; }
+        public Command RefreshCommand { get; }
+        public Command AddNewItemCommand { get; }
+
+		void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			Debug.WriteLine("[TaskList] OnCollectionChanged: Items have changed");
 		}
 
 		ObservableCollection<TodoItem> items = new ObservableCollection<TodoItem>();
@@ -39,9 +61,6 @@ namespace TodoList.ViewModels
 			}
 		}
 
-		Command refreshCmd;
-		public Command RefreshCommand => refreshCmd ?? (refreshCmd = new Command(async () => await ExecuteRefreshCommand()));
-
 		async Task ExecuteRefreshCommand()
 		{
 			if (IsBusy)
@@ -50,24 +69,26 @@ namespace TodoList.ViewModels
 
 			try
 			{
-				var table = App.CloudService.GetTable<TodoItem>();
-				var list = await table.ReadAllItemsAsync();
+                var identity = await cloudService.GetIdentityAsync();
+				if (identity != null)
+				{
+					var name = identity.UserClaims.FirstOrDefault(c => c.Type.Equals("name")).Value;
+					Title = $"Tasks for {name}";
+				}
+				var list = await Table.ReadAllItemsAsync();
 				Items.Clear();
-				foreach (var item in list)
-					Items.Add(item);
+                foreach (var item in list)
+                    Items.Add(item);
 			}
 			catch (Exception ex)
 			{
-				Debug.WriteLine($"[TaskList] Error loading items: {ex.Message}");
+				await Application.Current.MainPage.DisplayAlert("Items Not Loaded", ex.Message, "OK");
 			}
 			finally
 			{
 				IsBusy = false;
 			}
 		}
-
-		Command addNewCmd;
-		public Command AddNewItemCommand => addNewCmd ?? (addNewCmd = new Command(async () => await ExecuteAddNewItemCommand()));
 
 		async Task ExecuteAddNewItemCommand()
 		{
@@ -81,7 +102,7 @@ namespace TodoList.ViewModels
 			}
 			catch (Exception ex)
 			{
-				Debug.WriteLine($"[TaskList] Error in AddNewItem: {ex.Message}");
+				await Application.Current.MainPage.DisplayAlert("Item Not Added", ex.Message, "OK");
 			}
 			finally
 			{

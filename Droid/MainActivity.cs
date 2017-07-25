@@ -7,6 +7,9 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
+using Xamarin.Forms;
+using TodoList.Droid.Services;
+using TodoList.Abstractions;
 
 namespace TodoList.Droid
 {
@@ -23,6 +26,8 @@ namespace TodoList.Droid
             Microsoft.WindowsAzure.MobileServices.CurrentPlatform.Init();
 
             global::Xamarin.Forms.Forms.Init(this, bundle);
+
+            ((DroidLoginProvider)DependencyService.Get<ILoginProvider>()).Init(this);
 
             LoadApplication(new App());
         }

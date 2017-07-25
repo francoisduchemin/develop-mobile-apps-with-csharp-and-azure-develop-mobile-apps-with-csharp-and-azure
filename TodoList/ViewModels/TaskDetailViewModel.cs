@@ -2,17 +2,19 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using TodoList.Abstractions;
+using TodoList.Helpers;
 using TodoList.Models;
 using Xamarin.Forms;
 
 namespace TodoList.ViewModels
 {
 	public class TaskDetailViewModel : BaseViewModel
-	{
-		ICloudTable<TodoItem> table = App.CloudService.GetTable<TodoItem>();
-
+    {
 		public TaskDetailViewModel(TodoItem item = null)
 		{
+			var cloudService = ServiceLocator.Instance.Resolve<ICloudService>();
+			Table = cloudService.GetTable<TodoItem>();
+
 			if (item != null)
 			{
 				Item = item;
@@ -23,12 +25,15 @@ namespace TodoList.ViewModels
 				Item = new TodoItem { Text = "New Item", Complete = false };
 				Title = "New Item";
 			}
+
+			SaveCommand = new Command(async () => await ExecuteSaveCommand());
+			DeleteCommand = new Command(async () => await ExecuteDeleteCommand());
 		}
 
 		public TodoItem Item { get; set; }
-
-		Command cmdSave;
-		public Command SaveCommand => cmdSave ?? (cmdSave = new Command(async () => await ExecuteSaveCommand()));
+        public ICloudTable<TodoItem> Table { get; set; }
+		public Command SaveCommand { get; }
+		public Command DeleteCommand { get; }
 
 		async Task ExecuteSaveCommand()
 		{
@@ -40,18 +45,18 @@ namespace TodoList.ViewModels
 			{
 				if (Item.Id == null)
 				{
-					await table.CreateItemAsync(Item);
+					await Table.CreateItemAsync(Item);
 				}
 				else
 				{
-					await table.UpdateItemAsync(Item);
+					await Table.UpdateItemAsync(Item);
 				}
 				MessagingCenter.Send<TaskDetailViewModel>(this, "ItemsChanged");
 				await Application.Current.MainPage.Navigation.PopAsync();
 			}
 			catch (Exception ex)
 			{
-				Debug.WriteLine($"[TaskDetail] Save error: {ex.Message}");
+				await Application.Current.MainPage.DisplayAlert("Save Item Failed", ex.Message, "OK");
 			}
 			finally
 			{
@@ -60,7 +65,6 @@ namespace TodoList.ViewModels
 		}
 
 		Command cmdDelete;
-		public Command DeleteCommand => cmdDelete ?? (cmdDelete = new Command(async () => await ExecuteDeleteCommand()));
 
 		async Task ExecuteDeleteCommand()
 		{
@@ -72,14 +76,14 @@ namespace TodoList.ViewModels
 			{
 				if (Item.Id != null)
 				{
-					await table.DeleteItemAsync(Item);
+					await Table.DeleteItemAsync(Item);
 				}
 				MessagingCenter.Send<TaskDetailViewModel>(this, "ItemsChanged");
 				await Application.Current.MainPage.Navigation.PopAsync();
 			}
 			catch (Exception ex)
 			{
-				Debug.WriteLine($"[TaskDetail] Save error: {ex.Message}");
+				await Application.Current.MainPage.DisplayAlert("Delete Item Failed", ex.Message, "OK");
 			}
 			finally
 			{
