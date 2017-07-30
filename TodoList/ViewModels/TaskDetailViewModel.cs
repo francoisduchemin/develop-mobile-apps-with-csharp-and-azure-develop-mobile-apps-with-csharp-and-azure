@@ -12,9 +12,6 @@ namespace TodoList.ViewModels
     {
 		public TaskDetailViewModel(TodoItem item = null)
 		{
-			var cloudService = ServiceLocator.Instance.Resolve<ICloudService>();
-			Table = cloudService.GetTable<TodoItem>();
-
 			if (item != null)
 			{
 				Item = item;
@@ -30,8 +27,8 @@ namespace TodoList.ViewModels
 			DeleteCommand = new Command(async () => await ExecuteDeleteCommand());
 		}
 
+        public ICloudService CloudService => ServiceLocator.Instance.Resolve<ICloudService>();
 		public TodoItem Item { get; set; }
-        public ICloudTable<TodoItem> Table { get; set; }
 		public Command SaveCommand { get; }
 		public Command DeleteCommand { get; }
 
@@ -43,14 +40,10 @@ namespace TodoList.ViewModels
 
 			try
 			{
-				if (Item.Id == null)
-				{
-					await Table.CreateItemAsync(Item);
-				}
-				else
-				{
-					await Table.UpdateItemAsync(Item);
-				}
+                var table = await CloudService.GetTableAsync<TodoItem>();
+                await table.UpsertItemAsync(Item);
+                await CloudService.SyncOfflineCacheAsync();
+
 				MessagingCenter.Send<TaskDetailViewModel>(this, "ItemsChanged");
 				await Application.Current.MainPage.Navigation.PopAsync();
 			}
@@ -64,7 +57,7 @@ namespace TodoList.ViewModels
 			}
 		}
 
-		Command cmdDelete;
+		//Command cmdDelete;
 
 		async Task ExecuteDeleteCommand()
 		{
@@ -76,9 +69,12 @@ namespace TodoList.ViewModels
 			{
 				if (Item.Id != null)
 				{
-					await Table.DeleteItemAsync(Item);
+                    var table = await CloudService.GetTableAsync<TodoItem>();
+                    await table.DeleteItemAsync(Item);
+                    await CloudService.SyncOfflineCacheAsync();
+                    MessagingCenter.Send<TaskDetailViewModel>(this, "ItemsChanged");
 				}
-				MessagingCenter.Send<TaskDetailViewModel>(this, "ItemsChanged");
+				
 				await Application.Current.MainPage.Navigation.PopAsync();
 			}
 			catch (Exception ex)

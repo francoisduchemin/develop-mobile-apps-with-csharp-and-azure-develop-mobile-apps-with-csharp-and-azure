@@ -39,7 +39,7 @@
                 </ListView>
             </StackLayout>
             <!--  The Floating Button  -->
-            <Button BackgroundColor="Teal" Command="{Binding LogoutCommand}" RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                                                      Property=Width,&#xA;                                                                      Factor=1,&#xA;                                                                      Constant=-60}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                                                      Property=Height,&#xA;                                                                      Factor=1,&#xA;                                                                      Constant=-60}" Text="+" TextColor="White" />
+            <Button BackgroundColor="Teal" Command="{Binding AddNewItemCommand}" RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                                                      Property=Width,&#xA;                                                                      Factor=1,&#xA;                                                                      Constant=-60}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                                                      Property=Height,&#xA;                                                                      Factor=1,&#xA;                                                                      Constant=-60}" Text="+" TextColor="White" />
         </RelativeLayout>
     </ContentPage.Content>
 </ContentPage>

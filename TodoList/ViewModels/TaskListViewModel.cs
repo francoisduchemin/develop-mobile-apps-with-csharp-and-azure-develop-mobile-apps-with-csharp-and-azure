@@ -18,7 +18,6 @@ namespace TodoList.ViewModels
 		public TaskListViewModel()
 		{
             cloudService = ServiceLocator.Instance.Resolve<ICloudService>();
-            Table = cloudService.GetTable<TodoItem>();
 
 			Title = "Task List";
             items.CollectionChanged += this.OnCollectionChanged;
@@ -38,7 +37,6 @@ namespace TodoList.ViewModels
 			RefreshCommand.Execute(null);
 		}
 
-        public ICloudTable<TodoItem> Table { get; set; }
         public Command RefreshCommand { get; }
         public Command AddNewItemCommand { get; }
 		public Command LogoutCommand { get; }
@@ -80,13 +78,15 @@ namespace TodoList.ViewModels
 
 			try
 			{
+                await cloudService.SyncOfflineCacheAsync();
                 var identity = await cloudService.GetIdentityAsync();
 				if (identity != null)
 				{
 					var name = identity.UserClaims.FirstOrDefault(c => c.Type.Equals("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")).Value;
 					Title = $"Tasks for {name}";
 				}
-				var list = await Table.ReadItemsAsync(0, 20);
+                var table = await cloudService.GetTableAsync<TodoItem>();
+				var list = await table.ReadItemsAsync(0, 20);
 				Items.Clear();
                 foreach (var item in list)
                     Items.Add(item);
@@ -179,7 +179,8 @@ namespace TodoList.ViewModels
 			IsBusy = true;
 			try
 			{
-				var list = await Table.ReadItemsAsync(Items.Count, 20);
+                var table = await cloudService.GetTableAsync<TodoItem>();
+				var list = await table.ReadItemsAsync(Items.Count, 20);
 				if (list.Count > 0)
 				{
 					Debug.WriteLine($"LoadMore: got {list.Count} more items");

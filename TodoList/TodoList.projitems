@@ -53,6 +53,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\ItemVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\BehaviorBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Behaviors\EventToCommandBehavior.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Abstractions\IPlatform.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Abstractions\" />

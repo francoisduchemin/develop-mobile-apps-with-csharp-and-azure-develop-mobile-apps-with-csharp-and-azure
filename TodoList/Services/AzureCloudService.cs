@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices;
+using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
+using Plugin.Connectivity;
 using TodoList.Abstractions;
 using TodoList.Models;
 using Xamarin.Forms;
@@ -19,8 +22,37 @@ namespace TodoList.Services
 			client = new MobileServiceClient("https://todoappfrancois.azurewebsites.net");
 		}
 
-		public ICloudTable<T> GetTable<T>() where T : TableData
+		#region Offline Sync Initialization
+		async Task InitializeAsync()
 		{
+			// Short circuit - local database is already initialized
+			if (client.SyncContext.IsInitialized)
+				return;
+
+			// Create a reference to the local sqlite store
+			var store = new MobileServiceSQLiteStore("offlinecache.db");
+
+			// Define the database schema
+			store.DefineTable<TodoItem>();
+
+			// Actually create the store and update the schema
+			await client.SyncContext.InitializeAsync(store);
+		}
+		#endregion
+
+		//public ICloudTable<T> GetTable<T>() where T : TableData
+		//{
+		//	return new AzureCloudTable<T>(client);
+		//}
+
+		/// <summary>
+		/// Returns a link to the specific table.
+		/// </summary>
+		/// <typeparam name="T">The model</typeparam>
+		/// <returns>The table reference</returns>
+		public async Task<ICloudTable<T>> GetTableAsync<T>() where T : TableData
+		{
+			await InitializeAsync();
 			return new AzureCloudTable<T>(client);
 		}
 
@@ -45,6 +77,24 @@ namespace TodoList.Services
 			if (identities.Count > 0)
 				return identities[0];
 			return null;
+		}
+
+		public async Task SyncOfflineCacheAsync()
+		{
+			await InitializeAsync();
+
+			if (!(await CrossConnectivity.Current.IsRemoteReachable(client.MobileAppUri.Host, 443)))
+			{
+				Debug.WriteLine($"Cannot connect to {client.MobileAppUri} right now - offline");
+				return;
+			}
+
+			// Push the Operations Queue to the mobile backend
+			await client.SyncContext.PushAsync();
+
+			// Pull each sync table
+			var taskTable = await GetTableAsync<TodoItem>(); 
+            await taskTable.PullAsync();
 		}
 
 		public async Task LogoutAsync()
