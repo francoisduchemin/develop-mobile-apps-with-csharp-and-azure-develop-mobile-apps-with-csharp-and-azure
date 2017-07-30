@@ -50,6 +50,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Abstractions\ILoginProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\ServiceLocator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\AppServiceIdentity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\ItemVisibilityConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\BehaviorBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Behaviors\EventToCommandBehavior.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Abstractions\" />
@@ -58,5 +61,7 @@
     <Folder Include="$(MSBuildThisFileDirectory)Services\" />
     <Folder Include="$(MSBuildThisFileDirectory)ViewModels\" />
     <Folder Include="$(MSBuildThisFileDirectory)Helpers\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Converters\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Behaviors\" />
   </ItemGroup>
 </Project>

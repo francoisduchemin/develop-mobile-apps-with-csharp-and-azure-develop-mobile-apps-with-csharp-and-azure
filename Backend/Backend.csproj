@@ -131,11 +131,13 @@
     <Compile Include="DataObjects\TodoItem.cs" />
     <Compile Include="Models\MobileServiceContext.cs" />
     <Compile Include="Controllers\TodoItemController.cs" />
+    <Compile Include="Extensions\TodoItemExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataObjects\" />
     <Folder Include="Models\" />
     <Folder Include="Controllers\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
